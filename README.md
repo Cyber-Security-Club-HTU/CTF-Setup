@@ -16,6 +16,17 @@ CTFd-Whale is a plugin for CTFd that allows you to run challenges as standalone 
 - Integration with frp for challenge access
 - Support for both single-server and multi-server deployments
 
+## Quick Start
+
+This repository contains everything you need to run CTFd with CTFd-Whale. Simply clone this repository and follow the deployment guides:
+
+```bash
+git clone https://github.com/yourusername/CoolCTFd.git
+cd CoolCTFd
+```
+
+Then follow either the basic or advanced deployment guide.
+
 ## Deployment Options
 
 ### Basic Deployment (Single Server)
@@ -32,7 +43,7 @@ See [ADVANCED_DEPLOYMENT.md](ADVANCED_DEPLOYMENT.md) for detailed instructions.
 
 ## Important Note
 
-CTFd-Whale is already included in this repository as a plugin. There's no need to clone it separately when following the deployment guides.
+CTFd and CTFd-Whale are already included in this repository. There's no need to clone them separately when following the deployment guides.
 
 ## CTFd-Whale Plugin Configuration
 

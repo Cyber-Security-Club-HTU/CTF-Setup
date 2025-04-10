@@ -5,7 +5,6 @@ This guide will help you deploy CTFd and CTFd-Whale in a multi-server configurat
 ## Prerequisites
 
 Before proceeding with this advanced deployment, make sure you have:
-- Successfully deployed CTFd with CTFd-Whale on a single server
 - Basic understanding of Docker and frp
 - Two servers with network connectivity between them
 
@@ -138,14 +137,12 @@ networks:
 
 ## Web Server Setup
 
-### 1. Clone CTFd 3.5.3
+### 1. Clone the Repository
 
 ```bash
-git clone -b 3.5.3 https://github.com/CTFd/CTFd.git
-cd CTFd
+git clone https://github.com/yourusername/CoolCTFd.git
+cd CoolCTFd
 ```
-
-> **Note**: CTFd-Whale is already included in this repository as a plugin. There's no need to clone it separately.
 
 ### 2. Configure Docker with TLS Certificates
 
@@ -176,47 +173,13 @@ token = your_token
 subdomain_host = your-domain.com
 ```
 
-### 4. Update docker-compose.yml
-
-Add the frps service to your docker-compose.yml:
-
-```yaml
-services:
-  # ... existing services ...
-
-  frps:
-    image: glzjin/frp
-    restart: always
-    volumes:
-      - ./conf/frp:/conf
-    entrypoint:
-      - /usr/local/bin/frps
-      - -c
-      - /conf/frps.ini
-    ports:
-      - 10000-10100:10000-10100
-      - 8001:8001
-    networks:
-        default:
-        frp_connect:
-
-networks:
-    # ... existing networks ...
-    frp_connect:
-        driver: overlay
-        internal: true
-        ipam:
-            config:
-                - subnet: 172.1.0.0/16
-```
-
-### 5. Start Containers
+### 4. Start Containers
 
 ```bash
 docker-compose up -d
 ```
 
-### 6. Configure CTFd-Whale Plugin
+### 5. Configure CTFd-Whale Plugin
 
 Access the Whale Configuration page at `/plugins/ctfd-whale/admin/settings` and configure the following settings:
 

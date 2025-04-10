@@ -4,23 +4,21 @@ This guide will help you deploy CTFd and CTFd-Whale on a single VPS.
 
 ## Installation
 
-### 1. Initialize Docker Swarm
+### 1. Clone the Repository
 
-First, initialize a Docker swarm and label your node:
+```bash
+git clone https://github.com/yourusername/CoolCTFd.git
+cd CoolCTFd
+```
+
+### 2. Initialize Docker Swarm
+
+Initialize a Docker swarm and label your node:
 
 ```bash
 docker swarm init
 docker node update --label-add "name=linux-1" $(docker node ls -q)
 ```
-
-### 2. Clone CTFd 3.5.3
-
-```bash
-git clone -b 3.5.3 https://github.com/CTFd/CTFd.git
-cd CTFd
-```
-
-> **Note**: CTFd-Whale is already included in this repository as a plugin. There's no need to clone it separately.
 
 ### 3. Configure frps
 
@@ -53,69 +51,13 @@ admin_addr = 0.0.0.0
 admin_port = 7400
 ```
 
-### 5. Update docker-compose.yml
-
-Add the following services and networks to your docker-compose.yml:
-
-```yaml
-services:
-  # ... existing services ...
-
-  frps:
-    image: glzjin/frp
-    restart: always
-    volumes:
-      - ./conf/frp:/conf
-    entrypoint:
-      - /usr/local/bin/frps
-      - -c
-      - /conf/frps.ini
-    ports:
-      - 10000-10100:10000-10100
-      - 8001:8001
-    networks:
-        default:
-        frp_connect:
-
-  frpc:
-    image: glzjin/frp:latest
-    restart: always
-    volumes:
-      - ./conf/frp:/conf/
-    entrypoint:
-      - /usr/local/bin/frpc
-      - -c
-      - /conf/frpc.ini
-    depends_on:
-      - frps
-    networks:
-        frp_containers:
-        frp_connect:
-
-networks:
-    # ... existing networks ...
-    frp_connect:
-        driver: overlay
-        internal: true
-        ipam:
-            config:
-                - subnet: 172.1.0.0/16
-    frp_containers:
-        driver: overlay
-        internal: true
-        attachable: true
-        ipam:
-            config:
-                - subnet: 172.2.0.0/16
-```
-
-### 6. Start Containers
+### 5. Start Containers
 
 ```bash
 docker-compose up -d
 ```
 
-### 7. Configure CTFd-Whale Plugin
+### 6. Configure CTFd-Whale Plugin
 
 Access the Whale Configuration page at `/plugins/ctfd-whale/admin/settings` and configure the following settings:
 
@@ -153,7 +95,7 @@ admin_addr = 0.0.0.0
 admin_port = 7400
 ```
 
-### 8. Configure nginx (Optional)
+### 7. Configure nginx (Optional)
 
 If you are using CTFd 2.5.0+, you can utilize the included nginx.
 
