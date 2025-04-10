@@ -46,6 +46,33 @@ This document explains the network architecture and configuration of CTFd-Whale 
    - Access Pattern: `http://[container-uuid].ctfhtu.duckdns.org`
    - Purpose: Challenge container access through frp proxy
 
+### Docker Port Configuration
+
+In docker-compose.yml, we use `expose` instead of `ports` for CTFd's port 8000:
+
+```yaml
+services:
+  ctfd:
+    expose:
+      - "8000"
+```
+
+Instead of:
+
+```yaml
+services:
+  ctfd:
+    ports:
+      - "8000:8000"
+```
+
+**Why use `expose` instead of `ports`?**
+- `expose` makes ports available only to linked services within the same Docker network
+- `ports` publishes ports to the host machine, which is unnecessary for CTFd
+- Prevents direct access to CTFd from outside the Docker network
+- Avoids port conflicts with Nginx, which publishes port 8000 externally
+- Ensures all traffic goes through the properly configured Nginx reverse proxy
+
 ## Component Configuration
 
 ### 1. CTFd-Whale Web Settings
