@@ -15,9 +15,11 @@ class DBContainer:
         return container
 
     @staticmethod
-    def get_current_containers(user_id):
+    def get_current_containers(user_id, challenge_id=None):
         q = db.session.query(WhaleContainer)
         q = q.filter(WhaleContainer.user_id == user_id)
+        if challenge_id is not None:
+            q = q.filter(WhaleContainer.challenge_id == challenge_id)
         return q.first()
 
     @staticmethod
@@ -27,9 +29,11 @@ class DBContainer:
         return q.first()
 
     @staticmethod
-    def remove_container_record(user_id):
+    def remove_container_record(user_id, challenge_id=None):
         q = db.session.query(WhaleContainer)
         q = q.filter(WhaleContainer.user_id == user_id)
+        if challenge_id is not None:
+            q = q.filter(WhaleContainer.challenge_id == challenge_id)
         q.delete()
         db.session.commit()
 
