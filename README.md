@@ -1,6 +1,6 @@
 # CoolCTFd: Run CTFd-Whale Smoothly with CTFd
 
-CoolCTFd is a combination of CTFd and CTFd-Whale plugin that is meant to address the issue of the old CTFd-whale plugin version and make it compatible with the latest version of CTFd.
+CoolCTFd is a combination of CTFd and CTFd-Whale plugin that is meant to address the issue of the old CTFd-whale plugin version and make it compatible with CTFd.
 
 This project was created for the sole purpose of helping the CTFd community to have a better experience with CTFd-Whale plugin as it was a tedious process to get it working.
 
