@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>{{ Configs.ctf_name }}</title>
 	<meta charset="utf-8">
@@ -18,17 +19,18 @@
 			'csrfNonce': "{{ Session.nonce }}",
 			'userMode': "{{ Configs.user_mode }}",
 			'userId': {{ Session.id }},
-			'userName': {{ User.name | tojson }},
-			'userEmail': {{ User.email | tojson }},
-			'teamId': {{ Team.id | tojson }}, 
-			'teamName': {{ Team.name | tojson }},
-			'start': {{ Configs.start | tojson }},
-			'end': {{ Configs.end | tojson }},
-			'theme_settings': {{ Configs.theme_settings | tojson }}
+		'userName': { { User.name | tojson } },
+		'userEmail': { { User.email | tojson } },
+		'teamId': { { Team.id | tojson } },
+		'teamName': { { Team.name | tojson } },
+		'start': { { Configs.start | tojson } },
+		'end': { { Configs.end | tojson } },
+		'theme_settings': { { Configs.theme_settings | tojson } }
 		}
 	</script>
 	{{ Configs.theme_header }}
 </head>
+
 <body>
 	{% include "components/navbar.html" %}
 
@@ -39,8 +41,8 @@
 
 	<footer class="footer">
 		<div class="container text-center">
-			<a href="https://ctfd.io" class="text-secondary">
-				<small class="text-muted">Powered by CTFd</small>
+			<a href="https://github.com/smadi0x86" class="text-secondary">
+				<small class="text-muted">Made with ❤️ by smadi0x86</small>
 			</a>
 		</div>
 	</footer>
@@ -60,4 +62,5 @@
 
 	{{ Configs.theme_footer }}
 </body>
+
 </html>
