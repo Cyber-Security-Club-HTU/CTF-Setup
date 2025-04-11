@@ -41,6 +41,10 @@ The advanced deployment separates CTFd and challenges across multiple servers. T
 
 See [ADVANCED_DEPLOYMENT.md](ADVANCED_DEPLOYMENT.md) for detailed instructions.
 
+### Network Documentation
+
+See [NETWORK_DOCS.md](NETWORK_DOCS.md) for detailed instructions.
+
 ## Important Note
 
 CTFd and CTFd-Whale are already included in this repository. There's no need to clone them separately when following the deployment guides.
