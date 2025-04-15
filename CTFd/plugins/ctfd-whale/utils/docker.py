@@ -148,21 +148,58 @@ class DockerUtils:
     def remove_container(container):
         whale_id = f'{container.user_id}-{container.uuid}'
 
-        for s in DockerUtils.client.services.list(filters={'label': f'whale_id={whale_id}'}):
-            s.remove()
+        try:
+            # Remove all services with the whale_id label
+            services = DockerUtils.client.services.list(filters={'label': f'whale_id={whale_id}'})
+            for service in services:
+                try:
+                    # First try to stop all tasks
+                    tasks = service.tasks()
+                    for task in tasks:
+                        try:
+                            DockerUtils.client.api.kill_task(task['ID'])
+                        except Exception:
+                            pass
 
-        networks = DockerUtils.client.networks.list(names=[whale_id])
-        if len(networks) > 0:  # is grouped containers
-            auto_containers = get_config("whale:docker_auto_connect_containers", "").split(",")
-            redis_util = CacheProvider(app=current_app)
-            for network in networks:
-                for container in auto_containers:
+                    # Then force remove the service
+                    service.remove(force=True)
+                except Exception as e:
+                    print(f"Error removing service {service.name}: {str(e)}")
+                    # Try to remove the service again with a different approach
                     try:
-                        network.disconnect(container, force=True)
-                    except Exception:
-                        pass
-                redis_util.add_available_network_range(network.attrs['Labels']['prefix'])
-                network.remove()
+                        # First try to stop all tasks
+                        tasks = service.tasks()
+                        for task in tasks:
+                            try:
+                                DockerUtils.client.api.kill_task(task['ID'])
+                            except Exception:
+                                pass
+                        # Then remove the service
+                        DockerUtils.client.api.remove_service(service.id)
+                    except Exception as e2:
+                        print(f"Failed to remove service {service.name} after retry: {str(e2)}")
+
+            # Clean up networks
+            networks = DockerUtils.client.networks.list(names=[whale_id])
+            if len(networks) > 0:  # is grouped containers
+                auto_containers = get_config("whale:docker_auto_connect_containers", "").split(",")
+                redis_util = CacheProvider(app=current_app)
+                for network in networks:
+                    try:
+                        # Disconnect all containers from the network
+                        for container in auto_containers:
+                            try:
+                                network.disconnect(container, force=True)
+                            except Exception:
+                                pass
+                        # Add the network range back to available pool
+                        redis_util.add_available_network_range(network.attrs['Labels']['prefix'])
+                        # Remove the network
+                        network.remove()
+                    except Exception as e:
+                        print(f"Error removing network {network.name}: {str(e)}")
+        except Exception as e:
+            print(f"Error in remove_container: {str(e)}")
 
     @staticmethod
     def convert_readable_text(text):

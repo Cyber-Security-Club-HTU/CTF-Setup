@@ -1,5 +1,7 @@
 import fcntl
 import warnings
+import re
+import datetime
 
 import requests
 from flask import Blueprint, render_template, session, current_app, request
@@ -94,9 +96,65 @@ def load(app):
 
     def auto_clean_container():
         with app.app_context():
-            results = DBContainer.get_all_expired_container()
-            for r in results:
-                ControlUtil.try_remove_container(r.user_id)
+            try:
+                # Get current time
+                current_time = datetime.datetime.now()
+
+                # Clean up expired containers from database
+                results = DBContainer.get_all_expired_container()
+                for r in results:
+                    try:
+                        # Calculate time elapsed since container start
+                        time_elapsed = (current_time - r.start_time).total_seconds()
+                        timeout = int(get_config("whale:docker_timeout", "3600"))
+
+                        # Only remove if container has actually expired
+                        if time_elapsed >= timeout:
+                            # First remove the Docker service
+                            whale_id = f'{r.user_id}-{r.uuid}'
+                            client = DockerUtils.get_docker_client()
+                            services = client.services.list(filters={'label': f'whale_id={whale_id}'})
+                            for service in services:
+                                try:
+                                    service.remove(force=True)
+                                except Exception as e:
+                                    print(f"Error removing service {service.name}: {str(e)}")
+                                    # Try direct API call as fallback
+                                    try:
+                                        client.api.remove_service(service.id)
+                                    except Exception as e2:
+                                        print(f"Failed to remove service {service.name} after retry: {str(e2)}")
+
+                            # Then remove from database
+                            DBContainer.remove_container_record(r.user_id, r.challenge_id)
+                            print(f"Removed expired container: {whale_id} (elapsed: {time_elapsed}s, timeout: {timeout}s)")
+                    except Exception as e:
+                        print(f"Error cleaning up container {r.id}: {str(e)}")
+
+                # Clean up orphaned Docker Swarm services
+                client = DockerUtils.get_docker_client()
+                services = client.services.list()
+
+                for service in services:
+                    # Check if service name matches CTFd-Whale pattern
+                    if re.match(r'^\d+-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', service.name):
+                        try:
+                            # Check if service has any running tasks
+                            tasks = service.tasks()
+                            running_tasks = [t for t in tasks if t['Status']['State'] == 'running']
+
+                            if not running_tasks:
+                                # Check if this service exists in our database
+                                service_uuid = service.name.split('.')[0].split('-', 1)[1]
+                                container = DBContainer.query.filter_by(uuid=service_uuid).first()
+                                if not container:
+                                    # Service exists in Docker but not in our database - remove it
+                                    service.remove(force=True)
+                                    print(f"Removed orphaned service: {service.name}")
+                        except Exception as e:
+                            print(f"Error processing service {service.name}: {str(e)}")
+            except Exception as e:
+                print(f"Error in auto_clean_container: {str(e)}")
 
     app.register_blueprint(page_blueprint)
 

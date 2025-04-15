@@ -76,8 +76,8 @@ services:
       - -c
       - /conf/frps.ini
     ports:
-      - 10000-10100:10000-10100
       - 8001:8001
+      - 10000-10500:10000-10500
     networks:
         default:
         frp_connect:
