@@ -49,6 +49,12 @@ See [NETWORK_DOCS.md](NETWORK_DOCS.md) for detailed instructions.
 
 CTFd and CTFd-Whale are already included in this repository. There's no need to clone them separately when following the deployment guides.
 
+## Security Hardening
+
+When deploying CTFd on your server, please make sure to harden your server as well.
+
+Check out ~/hardening/README.md for more information.
+
 ## CTFd-Whale Plugin Configuration
 
 ### Docker Settings
