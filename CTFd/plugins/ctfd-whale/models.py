@@ -5,8 +5,7 @@ from datetime import datetime
 from jinja2 import Template
 
 from CTFd.utils import get_config
-from CTFd.models import db
-from CTFd.plugins.dynamic_challenges import DynamicChallenge
+from CTFd.models import db, Challenges
 
 
 class WhaleConfig(db.Model):
@@ -35,33 +34,40 @@ class WhaleRedirectTemplate(db.Model):
         return "<WhaleRedirectTemplate {0}>".format(self.key)
 
 
-class DynamicDockerChallenge(DynamicChallenge):
+class DynamicDockerChallenge(Challenges):
     __mapper_args__ = {"polymorphic_identity": "dynamic_docker"}
-    id = db.Column(
-        db.Integer, db.ForeignKey("dynamic_challenge.id", ondelete="CASCADE"), primary_key=True
-    )
+    id = db.Column(None, db.ForeignKey("challenges.id",
+                                       ondelete="CASCADE"), primary_key=True)
 
+    initial = db.Column(db.Integer, default=0)
+    minimum = db.Column(db.Integer, default=0)
+    decay = db.Column(db.Integer, default=0)
     memory_limit = db.Column(db.Text, default="128m")
     cpu_limit = db.Column(db.Float, default=0.5)
     dynamic_score = db.Column(db.Integer, default=0)
 
-    docker_image = db.Column(db.Text, default=0)
-    redirect_type = db.Column(db.Text, default=0)
+    docker_image = db.Column(db.Text, nullable=False)
+    redirect_type = db.Column(db.Text, default="http")
     redirect_port = db.Column(db.Integer, default=0)
+    function = db.Column(db.String(32), default="logarithmic")
 
     def __init__(self, *args, **kwargs):
-        kwargs["initial"] = kwargs["value"]
+        if "docker_image" not in kwargs or not kwargs["docker_image"]:
+            raise ValueError("docker_image is required")
         super(DynamicDockerChallenge, self).__init__(**kwargs)
+        self.initial = kwargs.get("value", 0)
+        self.function = kwargs.get("function", "logarithmic")
 
 
 class WhaleContainer(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(None, db.ForeignKey("users.id"))
-    challenge_id = db.Column(None, db.ForeignKey("challenges.id"))
-    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    user_id = db.Column(None, db.ForeignKey("users.id"), index=True)
+    challenge_id = db.Column(None, db.ForeignKey("challenges.id"), index=True)
+    start_time = db.Column(db.DateTime, nullable=False,
+                           default=datetime.utcnow)
     renew_count = db.Column(db.Integer, nullable=False, default=0)
     status = db.Column(db.Integer, default=1)
-    uuid = db.Column(db.String(256))
+    uuid = db.Column(db.String(256), unique=True)
     port = db.Column(db.Integer, nullable=True, default=0)
     flag = db.Column(db.String(128), nullable=False)
 

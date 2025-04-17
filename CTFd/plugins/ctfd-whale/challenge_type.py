@@ -56,8 +56,6 @@ class DynamicValueDockerChallenge(BaseChallenge):
             # We need to set these to floats so that the next operations don't operate on strings
             if attr in ("initial", "minimum", "decay"):
                 value = float(value)
-            if attr == 'dynamic_score':
-                value = int(value)
             setattr(challenge, attr, value)
 
         if challenge.dynamic_score == 1:
@@ -80,14 +78,15 @@ class DynamicValueDockerChallenge(BaseChallenge):
             return False, "Incorrect"
         else:
             user_id = current_user.get_current_user().id
-            q = db.session.query(WhaleContainer)
-            q = q.filter(WhaleContainer.user_id == user_id)
-            q = q.filter(WhaleContainer.challenge_id == challenge.id)
-            records = q.all()
-            if len(records) == 0:
-                return False, "Please solve it during the container is running"
+            container = WhaleContainer.query.filter_by(
+                user_id=user_id,
+                challenge_id=challenge.id,
+                status=1  # Only check running containers
+            ).first()
 
-            container = records[0]
+            if not container:
+                return False, "Please start a container first"
+
             if container.flag == submission:
                 return True, "Correct"
             return False, "Incorrect"
@@ -98,11 +97,12 @@ class DynamicValueDockerChallenge(BaseChallenge):
 
         if challenge.dynamic_score == 1:
             DynamicValueChallenge.calculate_value(challenge)
+            db.session.commit()
 
     @classmethod
     def delete(cls, challenge):
         for container in WhaleContainer.query.filter_by(
             challenge_id=challenge.id
         ).all():
-            ControlUtil.try_remove_container(container.user_id)
+            ControlUtil.try_remove_container(container.user_id, container.challenge_id)
         super().delete(challenge)
