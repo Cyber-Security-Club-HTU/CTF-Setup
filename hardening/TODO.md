@@ -1,0 +1,1 @@
+Adding TLS to docker socket (https://docs.docker.com/engine/security/protect-access/)
