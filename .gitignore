@@ -83,3 +83,6 @@ flask_profiler.sql
 
 # Project Related Files
 conf/frp/
+
+# SSL certificates
+conf/nginx/ssl/
