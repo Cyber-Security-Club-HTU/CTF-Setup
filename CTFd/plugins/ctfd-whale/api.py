@@ -96,7 +96,9 @@ class UserContainers(Resource):
         timeout = int(get_config("whale:docker_timeout", "3600"))
         if int(container.challenge_id) != int(challenge_id):
             return abort(403, f'Container started but not from this challenge ({container.challenge.name})', success=False)
-        print(type(container.start_time))
+
+        container.start_time = datetime.strptime(container.start_time, "%Y-%m-%d %H:%M:%S.%f") # Fix for 403 forbidden when starting containers
+        #print(type(container.start_time))
         return {
             'success': True,
             'data': {
