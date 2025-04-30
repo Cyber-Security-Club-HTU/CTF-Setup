@@ -71,6 +71,18 @@ docker-compose exec ctfd python3 -c "import docker; client = docker.from_env(); 
 docker-compose logs frpc
 ```
 
+### Issue 5: Failed to load resource: the server responded with a status of 403 (FORBIDDEN)
+
+This happens when you try to start a challenge, it will give you:
+```
+Failed to load resource: the server responded with a status of 403 (FORBIDDEN)
+http://ctf.htu.edu.jo/api/v1/plugins/ctfd-whale/container?challenge_id=#
+```
+
+**Solution**:
+
+To fix it, make sure to check your ctfd_frp_containers network using `docker networks ls` if its available, and also check on CTFd-whale web settings if its the same name.
+
 ### Additional Troubleshooting Tips
 
 #### Network Connectivity Issues
