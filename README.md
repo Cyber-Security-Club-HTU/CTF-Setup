@@ -23,8 +23,8 @@ CTFd-Whale is a plugin for CTFd that allows you to run challenges as standalone 
 This repository contains everything you need to run CTFd with CTFd-Whale. Simply clone this repository and follow the deployment guides:
 
 ```bash
-git clone https://github.com/yourusername/CoolCTFd.git
-cd CoolCTFd
+git clone https://github.com/Cyber-Security-Club-HTU/CTF-Setup CTFd
+cd CTFd
 ```
 
 Then follow either the basic or advanced deployment guide.
